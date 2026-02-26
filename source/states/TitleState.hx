@@ -241,8 +241,7 @@ class TitleState extends MusicBeatState
 					gfPosition.set(titleJSON.gfx, titleJSON.gfy);
 					logoPosition.set(titleJSON.titlex, titleJSON.titley);
 					enterPosition.set(titleJSON.startx, titleJSON.starty);
-					//musicBPM = titleJSON.bpm;
-					musicBPM = 140;
+					musicBPM = titleJSON.bpm;
 					
 					if(titleJSON.animation != null && titleJSON.animation.length > 0) animationName = titleJSON.animation;
 					if(titleJSON.dance_left != null && titleJSON.dance_left.length > 0) danceLeftFrames = titleJSON.dance_left;
