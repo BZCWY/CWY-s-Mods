@@ -1,0 +1,29 @@
+{
+	"songs": [
+		[
+			"Brain-rot",
+			"hidden",
+			[
+                255,
+				140,
+				0
+			]
+		]
+	],
+	"image": "",
+	"hiddenUntilUnlocked": false,
+	"hideFreeplay": false,
+	"weekBackground": "stage",
+	"difficulties": "hard",
+	"weekCharacters": [
+		"",
+		"",
+		""
+	],
+	"storyName": "Your New Week",
+	"weekName": "Custom Week",
+	"hideStoryMode": true,
+	"weekBefore": "tutorial",
+	"startUnlocked": true,
+	"image":  "1"
+}
