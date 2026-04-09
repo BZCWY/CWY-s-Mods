@@ -34,7 +34,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		antialiasingOption = optionsArray.length-1;
 
 		var option:Option = new Option('Shaders', //Name
-			"If unchecked, disables shaders.\nIt's used for some visual effects, and also CPU intensive for weaker " + Main.platform + ".", //Description
+			"If unchecked, disables shaders.\nIt's used for some visual effects, and also CPU intensive for weaker PCs.", //Description
 			'shaders',
 			BOOL);
 		addOption(option);
@@ -79,23 +79,13 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 	{
 		if(ClientPrefs.data.framerate > FlxG.drawFramerate)
 		{
-			if (ClientPrefs.data.fpsRework)
-				FlxG.stage.window.frameRate = ClientPrefs.data.framerate;
-			else
-			{
-				FlxG.updateFramerate = ClientPrefs.data.framerate;
-				FlxG.drawFramerate = ClientPrefs.data.framerate;
-			}
+			FlxG.updateFramerate = ClientPrefs.data.framerate;
+			FlxG.drawFramerate = ClientPrefs.data.framerate;
 		}
 		else
 		{
-			if (ClientPrefs.data.fpsRework)
-				FlxG.stage.window.frameRate = ClientPrefs.data.framerate;
-			else
-			{
-				FlxG.drawFramerate = ClientPrefs.data.framerate;
-				FlxG.updateFramerate = ClientPrefs.data.framerate;
-			}
+			FlxG.drawFramerate = ClientPrefs.data.framerate;
+			FlxG.updateFramerate = ClientPrefs.data.framerate;
 		}
 	}
 

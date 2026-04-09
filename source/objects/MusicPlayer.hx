@@ -158,6 +158,8 @@ class MusicPlayer extends FlxGroup
 				wasPlaying = false;
 			}
 		}
+		// 已移除上下键调整速度的代码
+		/*
 		if (controls.UI_UP_P)
 		{
 			holdPitchTime = 0;
@@ -179,8 +181,9 @@ class MusicPlayer extends FlxGroup
 				setPlaybackRate();
 			}
 		}
+		*/
 	
-		if (instance.touchPad.buttonC.justPressed || controls.RESET)
+		if (controls.RESET)
 		{
 			playbackRate = 1;
 			setPlaybackRate();
@@ -259,11 +262,7 @@ class MusicPlayer extends FlxGroup
 
 		if (playingMusic)
 		{
-			final space:String = (instance.controls.mobileC) ? "X" : "SPACE";
-			final escape:String = (instance.controls.mobileC) ? "B" : "ESCAPE";
-			final reset:String = (instance.controls.mobileC) ? "C" : "R";
-
-			instance.bottomText.text = Language.getPhrase('musicplayer_tip', 'Press {1} to Pause / Press {2} to Exit / Press {3} to Reset the Song', [space, escape, reset]);
+			instance.bottomText.text = Language.getPhrase('musicplayer_tip', 'Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song');
 			positionSong();
 			
 			progressBar.setRange(0, FlxG.sound.music.length);
@@ -286,18 +285,18 @@ class MusicPlayer extends FlxGroup
 
 	function updatePlaybackTxt()
 	{
-		var text = "";
-		if (playbackRate is Int)
-			text = playbackRate + '.00';
-		else
-		{
-			var playbackRate = Std.string(playbackRate);
-			if (playbackRate.split('.')[1].length < 2) // Playback rates for like 1.1, 1.2 etc
-				playbackRate += '0';
+		//var text = "";
+		//if (playbackRate is Int)
+			//text = playbackRate + '.00';
+		//else
+		//{
+			//var playbackRate = Std.string(playbackRate);
+			//if (playbackRate.split('.')[1].length < 2) // Playback rates for like 1.1, 1.2 etc
+				//playbackRate += '0';
 
-			text = playbackRate;
-		}
-		playbackTxt.text = text + 'x';
+			//text = playbackRate;
+		//}
+		//playbackTxt.text = text + 'x';
 	}
 
 	function positionSong() 

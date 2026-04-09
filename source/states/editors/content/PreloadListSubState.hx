@@ -149,7 +149,6 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 			else showOutput('File is not inside Psych Engine\'s folder!', true);
 		}
 
-		#if !mobile
 		var loadFileBtn:PsychUIButton = new PsychUIButton(0, bg.y + bg.height - 40, 'Load File', function()
 		{
 			if(!fileDialog.completed) return;
@@ -187,7 +186,6 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 		loadFolderBtn.screenCenter(X);
 		loadFolderBtn.cameras = cameras;
 		add(loadFolderBtn);
-		#end
 
 		var saveBtn:PsychUIButton = new PsychUIButton(0, bg.y + bg.height - 40, 'Save', function()
 		{
@@ -198,9 +196,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 		});
 		saveBtn.screenCenter(X);
 		saveBtn.cameras = cameras;
-		#if !mobile
 		saveBtn.x += 120;
-		#end
 		saveBtn.normalStyle.bgColor = FlxColor.GREEN;
 		saveBtn.normalStyle.textColor = FlxColor.WHITE;
 		add(saveBtn);

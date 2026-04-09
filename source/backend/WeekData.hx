@@ -18,7 +18,7 @@ typedef WeekFile =
 	var hideStoryMode:Bool;
 	var hideFreeplay:Bool;
 	var difficulties:String;
-	public var image:String;
+	var image:String;
 }
 
 class WeekData {
@@ -38,9 +38,7 @@ class WeekData {
 	public var hideStoryMode:Bool;
 	public var hideFreeplay:Bool;
 	public var difficulties:String;
-
 	public var fileName:String;
-
 	public var image:String;
 
 	public static function createWeekFile():WeekFile {
@@ -128,7 +126,7 @@ class WeekData {
 					}
 				}
 
-				for (file in Paths.readDirectory(directory))
+				for (file in FileSystem.readDirectory(directory))
 				{
 					var path = haxe.io.Path.join([directory, file]);
 					if (!FileSystem.isDirectory(path) && file.endsWith('.json'))

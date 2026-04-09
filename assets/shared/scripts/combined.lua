@@ -101,7 +101,7 @@ function opponentNoteHit(id, direction, noteType, isSustainNote)
     if not isSustainNote then
         local curHealth = getProperty('health')
         if curHealth > 0.1 then
-            setProperty('health', curHealth - 0.021)
+            setProperty('health', curHealth - 0.020)
         end
     end
 end

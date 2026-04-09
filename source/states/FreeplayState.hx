@@ -6,7 +6,6 @@ import backend.Song;
 
 import objects.HealthIcon;
 import objects.MusicPlayer;
-import objects.AudioDisplay;
 
 import options.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
@@ -22,7 +21,6 @@ class FreeplayState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
 
-	var audioDisplay:AudioDisplay;
 	var weekImage:FlxSprite;
 	var weekImageBorder:FlxSprite;
 
@@ -30,8 +28,6 @@ class FreeplayState extends MusicBeatState
 	private static var curSelected:Int = 0;
 	var lerpSelected:Float = 0;
 	var curDifficulty:Int = -1;
-	var visualBars:Array<FlxSprite>;
-	var visualTimer:Float = 0;
 	private static var lastDifficultyName:String = Difficulty.getDefault();
 
 	var scoreBG:FlxSprite;
@@ -51,6 +47,7 @@ class FreeplayState extends MusicBeatState
 	private var iconArray:Array<HealthIcon> = [];
 
 	var bg:FlxSprite;
+	var tetoWheel:FlxSprite;
 	var intendedColor:Int;
 
 	var missingTextBG:FlxSprite;
@@ -141,21 +138,20 @@ class FreeplayState extends MusicBeatState
 		weekImage.visible = false;
 		add(weekImage);
 
+		tetoWheel = new FlxSprite(50, FlxG.height / 2).loadGraphic(Paths.image('tetoa'));
+		tetoWheel.antialiasing = ClientPrefs.data.antialiasing;
+		//tetoWheel.setGraphicSize(200, 200);
+		tetoWheel.updateHitbox();
+		tetoWheel.screenCenter(Y);
+		tetoWheel.x = 1000;
+		add(tetoWheel);
+
 		grpSongs = new FlxTypedGroup<FreeplayItem>();
 		add(grpSongs);
 
-		var maxTextWidth:Float = 0;
-		for (s in songs)
-		{
-			var tempText = new FlxText(0, 0, 0, s.songName, 32);
-			tempText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.BLACK);
-			if (tempText.width > maxTextWidth) maxTextWidth = tempText.width;
-		}
-		var fixedWidth:Int = Std.int(maxTextWidth + 40);
-
-		var startX:Float = FlxG.width - fixedWidth - 200;
+		var startX:Float = FlxG.width - 692 - 0;
 		var startY:Float = 150;
-		var itemSpacing:Float = 120;
+		itemSpacing = 120;
 
 		grpSongs = new FlxTypedGroup<FreeplayItem>();
 		add(grpSongs);
@@ -164,42 +160,12 @@ class FreeplayState extends MusicBeatState
 		{
 			Mods.currentModDirectory = songs[i].folder;
 
-			var item = new FreeplayItem(startX, startY + i * itemSpacing, songs[i].songName, songs[i].songCharacter, fixedWidth);
+			var item = new FreeplayItem(startX, startY + i * itemSpacing, songs[i].songName, songs[i].songCharacter);
 			item.targetY = i;
 			item.visible = false;
 			grpSongs.add(item);
 		}
 
-		//for (i in 0...songs.length)
-			//{
-				//var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
-				//songText.targetY = i;
-				//grpSongs.add(songText);
-			
-				//songText.scaleX = Math.min(1, 980 / songText.width);
-				//songText.snapToPosition();
-			
-				// --- 新增：设置斜线排列的起始点和偏移量 ---
-				//var startX:Float = FlxG.width - 250;   // 起始 X（右上角附近）
-				//var startY:Float = 150;                 // 起始 Y
-				//var offsetX:Float = -180;                // 每项向左偏移量
-				//var offsetY:Float = 80;                  // 每项向下偏移量
-			
-				//songText.startPosition.set(startX, startY);
-				// 因为 updateTexts 中 y 偏移会乘 1.3，所以 distancePerItem.y 需除以 1.3 以补偿
-				//songText.distancePerItem.set(offsetX, offsetY / 1.3);
-				// ----------------------------------------
-			
-				//Mods.currentModDirectory = songs[i].folder;
-				//var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
-				//icon.sprTracker = songText;
-			
-				//songText.visible = songText.active = songText.isMenuItem = false;
-				//icon.visible = icon.active = false;
-			
-				//iconArray.push(icon);
-				//add(icon);
-			//}
 		WeekData.setDirectoryFromWeek();
 
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
@@ -250,30 +216,10 @@ class FreeplayState extends MusicBeatState
 		add(player);
 
 		itemSpacing = 120;
-
-		//var barCount = 32;                    // 条形数量
-		//visualBars = [];
-		//for (i in 0...barCount)
-		//{
-			//var bar = new FlxSprite(0, 0).makeGraphic(10, 100, 0xAAFFFFFF); // 半透明白色
-			//bar.origin.set(0, bar.height);     // 原点设在底部中心（x=0 左对齐，y=底部）
-			//bar.visible = false;               // 默认隐藏
-			//bar.scrollFactor.set();             // 固定屏幕
-			//bar.x = (FlxG.width - barCount * 15) / 2 + i * 15; // 居中排列
-			//bar.y = FlxG.height - 30;            // 距底部 30 像素
-			//add(bar);
-			//visualBars.push(bar);
-		//}
-
-		audioDisplay = new AudioDisplay(null, 0, FlxG.height - 30, FlxG.width, 100, 32, 2, 0xFFFFFFFF);
-		audioDisplay.scrollFactor.set();
-		audioDisplay.visible = false;
-		add(audioDisplay);
 				
 		changeSelection();
 		updateTexts();
 		super.create();
-		addTouchPad('LEFT_FULL', 'A_B');
 	}
 
 	override function closeSubState()
@@ -281,7 +227,6 @@ class FreeplayState extends MusicBeatState
 		changeSelection(0, false);
 		persistentUpdate = true;
 		super.closeSubState();
-		//addTouchPad('LEFT_FULL', 'A_B_C_X_Y_Z');
 	}
 
 	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
@@ -395,11 +340,6 @@ class FreeplayState extends MusicBeatState
 					//player.playingMusic = false;
 					//player.switchPlayMusic();
 			
-					// --- 新增：隐藏音频显示 ---
-					//audioDisplay.visible = false;
-					//audioDisplay.clearUpdate();
-					// --- 结束新增 ---
-			
 					//FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 					//FlxTween.tween(FlxG.sound.music, {volume: 1}, 1);
 				//}
@@ -419,11 +359,10 @@ class FreeplayState extends MusicBeatState
 			//}
 		}
 
-		/*if(FlxG.keys.justPressed.CONTROL || touchPad.buttonC.justPressed)
+		if(FlxG.keys.justPressed.CONTROL)
 		{
 			persistentUpdate = false;
 			openSubState(new GameplayChangersSubstate());
-			removeTouchPad();
 		}
 		else if(FlxG.keys.justPressed.SPACE)
 			{
@@ -456,17 +395,11 @@ class FreeplayState extends MusicBeatState
 				{
 					playPreviewMusic(true);
 				}
-			}*/
-		if (controls.ACCEPT)
+			}
+		else if (controls.ACCEPT)
 		{
-
-			
 			player.playingMusic = false;
 			player.switchPlayMusic();
-			
-			//audioDisplay.visible = false;
-			FlxTween.tween(audioDisplay, {alpha: 0}, 1);
-			audioDisplay.clearUpdate();
 			
 			FlxTween.tween(FlxG.sound.music, {volume: 0}, 1);
 			FlxG.sound.music.stop();
@@ -520,15 +453,14 @@ class FreeplayState extends MusicBeatState
 			DiscordClient.loadModRPC();
 			#end
 		}
-		/*else if(controls.RESET || touchPad.buttonY.justPressed)
+		else if(controls.RESET)
 		{
 			persistentUpdate = false;
 			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
-			removeTouchPad();
 			FlxG.sound.play(Paths.sound('scrollMenu'));
-		}*/
+		}
 		updateTexts(elapsed);
-		super.update(elapsed);
+		super.update(elapsed); 
 	}
 	
 	function getVocalFromCharacter(char:String)
@@ -618,6 +550,11 @@ class FreeplayState extends MusicBeatState
 		changeDiff();
 		playPreviewMusic(false);
 		_updateSongLastDifficulty();
+
+		var rotDelta = (change > 0) ? 180 : -180;
+		FlxTween.cancelTweensOf(tetoWheel);
+		FlxTween.angle(tetoWheel, tetoWheel.angle, tetoWheel.angle + rotDelta, 0.3, {ease: FlxEase.circOut});
+		FlxTween.angle(tetoWheel, tetoWheel.angle, tetoWheel.angle + rotDelta, 0.3, {ease: FlxEase.quadInOut});
 		updateWeekImage();
 	}
 
@@ -676,9 +613,9 @@ class FreeplayState extends MusicBeatState
 				weekImage.alpha = 0;
 				weekImage.visible = true;
 		
-				var borderThickness:Int = 2;
+				var borderThickness:Int = 5;
 				weekImageBorder.setPosition(weekImage.x - borderThickness, weekImage.y - borderThickness);
-				weekImageBorder.makeGraphic(Std.int(weekImage.width + borderThickness * 2), Std.int(weekImage.height + borderThickness * 2), 0xFFFFFFFF);
+				weekImageBorder.makeGraphic(Std.int(weekImage.width + borderThickness * 2), Std.int(weekImage.height + borderThickness * 2), songs[curSelected].color);
 				weekImageBorder.alpha = 0;
 				weekImageBorder.visible = true;
 		
@@ -759,14 +696,6 @@ class FreeplayState extends MusicBeatState
 				FlxG.sound.music.volume = 0;
 				FlxTween.tween(FlxG.sound.music, {volume: 0.8}, 0.5);
 		
-				if (audioDisplay != null)
-				{
-					trace("Playing inst: " + Paths.inst(PlayState.SONG.song));
-					audioDisplay.snd = FlxG.sound.music;
-					audioDisplay.visible = true;
-					audioDisplay.stopUpdate = false;
-				}
-		
 				instPlaying = curSelected;
 				player.playingMusic = true;
 				player.curTime = 0;
@@ -807,33 +736,21 @@ class FreeplayState extends MusicBeatState
 		{
 			lerpSelected = FlxMath.lerp(curSelected, lerpSelected, Math.exp(-elapsed * 9.6));
 		
-			for (i in _lastVisibles)
+			var baseX:Float = FlxG.width - 692 - 0;
+			var baseY:Float = 150;
+		
+			for (i in 0...grpSongs.members.length)
 			{
-				grpSongs.members[i].visible = false;
-			}
-			_lastVisibles = [];
+				var item = grpSongs.members[i];
+				var diff = i - lerpSelected;
+				var targetY = baseY + diff * itemSpacing;
+				item.y = targetY;
+				item.x = baseX;
 		
-			var centerY:Float = FlxG.height / 2;
-			var safeBottom:Float = FlxG.height - 150;
-		
-			var min:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected - _drawDistance)));
-			var max:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected + _drawDistance)));
-		
-			for (i in min...max)
-			{
-				var item:FreeplayItem = grpSongs.members[i];
-				var diff:Float = (i - lerpSelected);
-				var yPos:Float = centerY + diff * itemSpacing;
-		
-				if (yPos + item.itemHeight > safeBottom || yPos < 0)
-				{
+				if (targetY + item.itemHeight < 0 || targetY > FlxG.height)
 					item.visible = false;
-					continue;
-				}
-		
-				item.y = yPos;
-				item.visible = true;
-				_lastVisibles.push(i);
+				else
+					item.visible = true;
 			}
 		}
 
@@ -867,72 +784,53 @@ class SongMetadata
 	}
 }
 
-
-
-
-
 class FreeplayItem extends FlxSpriteGroup
 {
     public var targetY:Int = 0;
+    public var itemHeight:Float = 103;
 
-    public var outerBg:FlxSprite;
-    public var bg:FlxSprite;
+    public var buttonBg:FlxSprite;
     public var text:FlxText;
     public var icon:HealthIcon;
-	public var itemHeight:Float;
 
-    public function new(x:Float, y:Float, songName:String, songCharacter:String, ?fixedWidth:Int = 0)
+    public function new(x:Float, y:Float, songName:String, songCharacter:String)
     {
         super(x, y);
+
+        var frames = Paths.getSparrowAtlas('button');
+        
+        buttonBg = new FlxSprite(0, 0);
+        buttonBg.frames = frames;
+        buttonBg.animation.addByPrefix('deselected', 'button_deselected', 24, false);
+        buttonBg.animation.addByPrefix('selected', 'button_selected', 24, false);
+        buttonBg.animation.play('deselected');
+        buttonBg.antialiasing = ClientPrefs.data.antialiasing;
+        add(buttonBg);
 
         text = new FlxText(0, 0, 0, songName, 32);
         text.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.BLACK, LEFT);
         text.setBorderStyle(OUTLINE, FlxColor.WHITE, 1);
-
-        var padding:Int = 20;
-        var bgWidth:Int = (fixedWidth > 0) ? fixedWidth : Std.int(text.width + padding * 2);
-        var bgHeight:Int = Std.int(text.height + padding);
-
-        var outerPadding:Int = 4;
-        var outerWidth:Int = bgWidth + outerPadding * 2;
-        var outerHeight:Int = bgHeight + outerPadding * 2;
-        outerBg = new FlxSprite().makeGraphic(outerWidth, outerHeight, 0xAAADD8E6);
-        outerBg.x = -outerPadding;
-        outerBg.y = -outerPadding;
-        outerBg.alpha = 0.5;
-        add(outerBg);
-
-        bg = new FlxSprite().makeGraphic(bgWidth, bgHeight, 0xCCFFFFFF);
-        bg.alpha = 0.75;
-        bg.x = 0;
-        bg.y = 0;
-        add(bg);
-
-        text.setPosition((bgWidth - text.width) / 2, (bgHeight - text.height) / 2);
+        text.x = (buttonBg.width - text.width) / 2 - 10;
+        text.y = (buttonBg.height - text.height) / 2;
         add(text);
 
         icon = new HealthIcon(songCharacter);
-        icon.setPosition(bgWidth + 10, (bgHeight - icon.height) / 2);
+        icon.setPosition(buttonBg.width - icon.width - 20, (buttonBg.height - icon.height) / 2);
         add(icon);
-
-		itemHeight = bgHeight; 
     }
 
     public function select(selected:Bool)
     {
+        buttonBg.animation.play(selected ? 'selected' : 'deselected');
         if (selected)
         {
-            bg.alpha = 1.0;
             text.color = 0xFFFFFF;
             icon.alpha = 1.0;
-            outerBg.alpha = 0.7;
         }
         else
         {
-            bg.alpha = 0.75;
             text.color = 0x000000;
             icon.alpha = 0.6;
-            outerBg.alpha = 0.5;
         }
     }
 }
