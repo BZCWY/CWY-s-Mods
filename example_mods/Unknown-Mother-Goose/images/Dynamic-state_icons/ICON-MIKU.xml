@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="ICON-MIKU.png">
+	<!-- Created with Adobe Animate version 22.0.0.93 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="ICON-DANGER0000" x="0" y="0" width="200" height="200"/>
+	<SubTexture name="ICON-DANGER0001" x="200" y="0" width="200" height="200"/>
+	<SubTexture name="ICON-DANGER0002" x="400" y="0" width="200" height="200"/>
+	<SubTexture name="ICON-DANGER0003" x="600" y="0" width="200" height="200"/>
+	<SubTexture name="ICON-NORMAL0000" x="800" y="0" width="200" height="200"/>
+	<SubTexture name="ICON-NORMAL0001" x="800" y="0" width="200" height="200"/>
+	<SubTexture name="ICON-NORMAL0002" x="0" y="200" width="200" height="200"/>
+	<SubTexture name="ICON-NORMAL0003" x="0" y="200" width="200" height="200"/>
+</TextureAtlas>
