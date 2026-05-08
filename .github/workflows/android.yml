@@ -20,17 +20,6 @@ jobs:
         with:
           haxe-version: 4.3.7
       
-      - name: Restore Previous Cache
-        id: cache-debug-build-android-restore
-        uses: actions/cache/restore@main
-        with:
-          path: |
-            ~/haxelib
-            ~/.gradle
-            export/release/android/haxe
-            export/release/android/obj
-          key: cache-android-build
-      
       - name: Install Haxelib
         run: |
           haxelib setup ~/haxelib
@@ -55,54 +44,34 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME_21_arm64
           haxelib run lime config ANDROID_SETUP true
 
-      - name: Clean old build artifacts
-        run: rm -rf export/release/android/bin
+      - name: Build Android (with stacktrace)
+        run: haxelib run lime build android -Dgradle-args="--stacktrace"
+        continue-on-error: true
 
-      - name: Compile
-        run: haxelib run lime build android -Dgradle-args=--stacktrace
+      - name: Dump AndroidManifest.xml
+        if: always()
+        run: |
+          echo "=== AndroidManifest.xml content ==="
+          cat export/release/android/bin/app/src/main/AndroidManifest.xml 2>/dev/null || echo "File not found"
+          echo "=== END ==="
 
-      - name: Dump AndroidManifest for debug
-        if: failure()
-        run: cat export/release/android/bin/app/src/main/AndroidManifest.xml 2>/dev/null || echo "File not found"
-      
-      - name: Clear Previous Cache
-        uses: actions/github-script@main
+      - name: Upload build directory on failure
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            try {
-            	const caches = await github.rest.actions.getActionsCacheList({
-            		owner: context.repo.owner,
-            		repo: context.repo.repo,
-            	})
-            	if (typeof caches.data.actions_caches != null && caches.data.actions_caches.length > 0) {
-            		for (const cache of caches.data.actions_caches) {
-            			if (cache.key == "cache-android-build") {
-            				console.log('Clearing ' + cache.key + '...')
-            				await github.rest.actions.deleteActionsCacheById({
-            					owner: context.repo.owner,
-            					repo: context.repo.repo,
-            					cache_id: cache.id,
-            				})
-            				console.log("Previous Cache Cleared!")
-            			}
-            		}
-            	}
-            } catch (error) {
-            	console.log(error.message);
-            }
-      - name: Save Current Cache
-        id: cache-release-build-android-save
-        uses: actions/cache/save@main
-        with:
-          path: |
-            ~/haxelib
-            ~/.gradle
-            export/release/android/haxe
-            export/release/android/obj
-          key: cache-android-build
-      
+          name: android-build-dir
+          path: export/release/android/bin/
+          if-no-files-found: ignore
+
+      - name: Fail if build failed
+        if: steps.build.outcome == 'failure'
+        run: |
+          echo "Build failed, see logs above"
+          exit 1
+
       - name: Publish Artifact
-        uses: actions/upload-artifact@main
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v4
         with:
           name: buildAndroid
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
