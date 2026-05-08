@@ -59,7 +59,11 @@ jobs:
         run: rm -rf export/release/android/bin
 
       - name: Compile
-        run: haxelib run lime build android
+        run: haxelib run lime build android -Dgradle-args=--stacktrace
+
+      - name: Dump AndroidManifest for debug
+        if: failure()
+        run: cat export/release/android/bin/app/src/main/AndroidManifest.xml 2>/dev/null || echo "File not found"
       
       - name: Clear Previous Cache
         uses: actions/github-script@main
