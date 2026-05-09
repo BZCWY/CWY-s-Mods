@@ -82,32 +82,96 @@ class Controls
 	private function get_PAUSE() return justPressed('pause');
 	private function get_RESET() return justPressed('reset');
 
-	//Gamepad & Keyboard stuff
-	public var keyboardBinds:Map<String, Array<FlxKey>>;
-	public var gamepadBinds:Map<String, Array<FlxGamepadInputID>>;
-	public function justPressed(key:String)
+//Gamepad & Keyboard stuff
+#if mobile
+import mobile.input.MobileInputID;
+import mobile.objects.MobileControls;
+#end
+
+public var keyboardBinds:Map<String, Array<FlxKey>>;
+public var gamepadBinds:Map<String, Array<FlxGamepadInputID>>;
+
+#if mobile
+private function _getMobileInputID(key:String):Null<MobileInputID>
+{
+	switch(key)
 	{
-		var result:Bool = (FlxG.keys.anyJustPressed(keyboardBinds[key]) == true);
-		if(result) controllerMode = false;
-
-		return result || _myGamepadJustPressed(gamepadBinds[key]) == true;
+		case 'ui_up': return MobileInputID.UP;
+		case 'ui_down': return MobileInputID.DOWN;
+		case 'ui_left': return MobileInputID.LEFT;
+		case 'ui_right': return MobileInputID.RIGHT;
+		case 'note_up': return MobileInputID.NOTE_UP;
+		case 'note_down': return MobileInputID.NOTE_DOWN;
+		case 'note_left': return MobileInputID.NOTE_LEFT;
+		case 'note_right': return MobileInputID.NOTE_RIGHT;
+		case 'accept': return MobileInputID.A;
+		case 'back': return MobileInputID.B;
+		case 'pause': return MobileInputID.EXTRA_1;
+		case 'reset': return MobileInputID.EXTRA_2;
+		default: return null;
 	}
+}
 
-	public function pressed(key:String)
-	{
-		var result:Bool = (FlxG.keys.anyPressed(keyboardBinds[key]) == true);
-		if(result) controllerMode = false;
+private function _mobilePressed(key:String):Bool
+{
+	if (MobileControls.instance == null) return false;
+	var id = _getMobileInputID(key);
+	if (id == null) return false;
+	return MobileControls.instance.buttonPressed(id);
+}
 
-		return result || _myGamepadPressed(gamepadBinds[key]) == true;
-	}
+private function _mobileJustPressed(key:String):Bool
+{
+	if (MobileControls.instance == null) return false;
+	var id = _getMobileInputID(key);
+	if (id == null) return false;
+	return MobileControls.instance.buttonJustPressed(id);
+}
 
-	public function justReleased(key:String)
-	{
-		var result:Bool = (FlxG.keys.anyJustReleased(keyboardBinds[key]) == true);
-		if(result) controllerMode = false;
+private function _mobileJustReleased(key:String):Bool
+{
+	if (MobileControls.instance == null) return false;
+	var id = _getMobileInputID(key);
+	if (id == null) return false;
+	return MobileControls.instance.buttonJustReleased(id);
+}
+#end
 
-		return result || _myGamepadJustReleased(gamepadBinds[key]) == true;
-	}
+public function justPressed(key:String)
+{
+	#if mobile
+	if (_mobileJustPressed(key)) return true;
+	#end
+
+	var result:Bool = (FlxG.keys.anyJustPressed(keyboardBinds[key]) == true);
+	if(result) controllerMode = false;
+
+	return result || _myGamepadJustPressed(gamepadBinds[key]) == true;
+}
+
+public function pressed(key:String)
+{
+	#if mobile
+	if (_mobilePressed(key)) return true;
+	#end
+
+	var result:Bool = (FlxG.keys.anyPressed(keyboardBinds[key]) == true);
+	if(result) controllerMode = false;
+
+	return result || _myGamepadPressed(gamepadBinds[key]) == true;
+}
+
+public function justReleased(key:String)
+{
+	#if mobile
+	if (_mobileJustReleased(key)) return true;
+	#end
+
+	var result:Bool = (FlxG.keys.anyJustReleased(keyboardBinds[key]) == true);
+	if(result) controllerMode = false;
+
+	return result || _myGamepadJustReleased(gamepadBinds[key]) == true;
+}
 
 	public var controllerMode:Bool = false;
 	private function _myGamepadJustPressed(keys:Array<FlxGamepadInputID>):Bool

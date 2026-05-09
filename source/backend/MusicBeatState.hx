@@ -2,6 +2,10 @@ package backend;
 
 import flixel.FlxState;
 import backend.PsychCamera;
+#if mobile
+import mobile.backend.MobileData;
+import mobile.objects.MobileControls;
+#end
 
 class MusicBeatState extends FlxState
 {
@@ -22,12 +26,25 @@ class MusicBeatState extends FlxState
 	var _psychCameraInitialized:Bool = false;
 
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	#if mobile
+	public var mobileControls:MobileControls;
+	#end
+
 	public static function getVariables()
 		return getState().variables;
 
 	override function create() {
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
+
+		#if mobile
+		MobileData.init();
+		if (mobileControls == null) {
+			mobileControls = new MobileControls();
+			add(mobileControls);
+		}
+		#end
 
 		if(!_psychCameraInitialized) initPsychCamera();
 

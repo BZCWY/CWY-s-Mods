@@ -30,6 +30,8 @@ package mobile.objects;
  */
 class MobileControls extends FlxTypedSpriteGroup<MobileInputManager>
 {
+	public static var instance:MobileControls;
+
 	public var touchPad:TouchPad = new TouchPad('NONE', 'NONE', NONE);
 	public var hitbox:Hitbox = new Hitbox(NONE);
 
@@ -48,6 +50,7 @@ class MobileControls extends FlxTypedSpriteGroup<MobileInputManager>
 			case 3: // HITBOX
 				initControler(3, extra);
 		}
+		instance = this;
 		alpha = ClientPrefs.data.controlsAlpha;
 	}
 
@@ -77,9 +80,32 @@ class MobileControls extends FlxTypedSpriteGroup<MobileInputManager>
 		}
 	}
 
-	override public function destroy():Void
+	public function buttonPressed(id:MobileInputID):Bool
+	{
+		if (touchPad != null) return touchPad.buttonPressed(id);
+		if (hitbox != null) return hitbox.buttonPressed(id);
+		return false;
+	}
+
+	public function buttonJustPressed(id:MobileInputID):Bool
+	{
+		if (touchPad != null) return touchPad.buttonJustPressed(id);
+		if (hitbox != null) return hitbox.buttonJustPressed(id);
+		return false;
+	}
+
+	public function buttonJustReleased(id:MobileInputID):Bool
+	{
+		if (touchPad != null) return touchPad.buttonJustReleased(id);
+		if (hitbox != null) return hitbox.buttonJustReleased(id);
+		return false;
+	}
+
+		override public function destroy():Void
 	{
 		super.destroy();
+
+		instance = null;
 
 		if (touchPad != null)
 		{
