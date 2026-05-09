@@ -223,6 +223,20 @@ class MusicBeatState extends FlxState
 				func(stage);
 	}
 
+	#if mobile
+	override function openSubState(SubState:FlxSubState)
+	{
+		if (mobileControls != null) mobileControls.visible = false;
+		super.openSubState(SubState);
+	}
+
+	override function closeSubState(?destroySubState:Bool = true)
+	{
+		super.closeSubState(destroySubState);
+		if (mobileControls != null) mobileControls.visible = true;
+	}
+	#end
+
 	function getBeatsOnSection()
 	{
 		var val:Null<Float> = 4;
