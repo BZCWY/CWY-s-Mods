@@ -44,15 +44,21 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME_21_arm64
           haxelib run lime config ANDROID_SETUP true
 
-      - name: Build Android (with stacktrace)
+      - name: Build Android
+        id: build
         run: haxelib run lime build android -Dgradle-args="--stacktrace"
         continue-on-error: true
 
       - name: Dump AndroidManifest.xml
         if: always()
         run: |
-          echo "=== AndroidManifest.xml content ==="
-          cat export/release/android/bin/app/src/main/AndroidManifest.xml 2>/dev/null || echo "File not found"
+          echo "=== AndroidManifest.xml (app/src/main/) ==="
+          cat export/release/android/bin/app/src/main/AndroidManifest.xml 2>/dev/null || echo "File not found at app/src/main/"
+          echo "=== AndroidManifest.xml (build/) ==="
+          find export/release/android/bin/ -name "AndroidManifest.xml" 2>/dev/null | while read f; do
+            echo "--- $f ---"
+            cat "$f"
+          done
           echo "=== END ==="
 
       - name: Upload build directory on failure
