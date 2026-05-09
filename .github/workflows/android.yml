@@ -19,7 +19,7 @@ jobs:
         uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.3.7
-      
+
       - name: Install Haxelib
         run: |
           haxelib setup ~/haxelib
@@ -35,7 +35,7 @@ jobs:
           haxelib git linc_luajit https://github.com/ShadowEngineTeam/linc_luajit
           haxelib install tjson 1.4.0
           haxelib list
-      
+
       - name: Setup Lime
         run: |
           haxelib run lime setup -alias -y
@@ -44,39 +44,42 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME_21_arm64
           haxelib run lime config ANDROID_SETUP true
 
-      - name: Build Android
-        id: build
+      - name: Lime build (generate Android project only)
         run: haxelib run lime build android -Dgradle-args="--stacktrace"
         continue-on-error: true
+        id: limebuild
 
-      - name: Dump AndroidManifest.xml
-        if: always()
+      - name: Fix AndroidManifest.xml
+        if: always() && steps.limebuild.outcome == 'failure'
         run: |
-          echo "=== AndroidManifest.xml (app/src/main/) ==="
-          cat export/release/android/bin/app/src/main/AndroidManifest.xml 2>/dev/null || echo "File not found at app/src/main/"
-          echo "=== AndroidManifest.xml (build/) ==="
-          find export/release/android/bin/ -name "AndroidManifest.xml" 2>/dev/null | while read f; do
-            echo "--- $f ---"
-            cat "$f"
-          done
-          echo "=== END ==="
+          MANIFEST="export/release/android/bin/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST" ]; then
+            echo "=== Before fix ==="
+            grep -n 'if="lime' "$MANIFEST" || echo "No if=lime found"
+            # Remove the bad 'if="lime &ge; 8.2.0"' attribute that Lime template left behind
+            sed -i '' 's/ if="lime &ge; 8\.2\.0"//g' "$MANIFEST"
+            echo "=== After fix ==="
+            grep -n 'application' "$MANIFEST"
+          else
+            echo "Manifest not found at $MANIFEST"
+          fi
 
-      - name: Upload build directory on failure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-build-dir
-          path: export/release/android/bin/
-          if-no-files-found: ignore
+      - name: Retry Gradle build
+        if: always() && steps.limebuild.outcome == 'failure'
+        id: gradlebuild
+        working-directory: export/release/android/bin
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --stacktrace
 
       - name: Fail if build failed
-        if: steps.build.outcome == 'failure'
+        if: steps.limebuild.outcome == 'failure' && steps.gradlebuild.outcome == 'failure'
         run: |
-          echo "Build failed, see logs above"
+          echo "Build failed after retry"
           exit 1
 
       - name: Publish Artifact
-        if: steps.build.outcome == 'success'
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: buildAndroid
